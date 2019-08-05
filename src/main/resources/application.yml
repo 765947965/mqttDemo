@@ -1,0 +1,6 @@
+broker:
+  port: 1884
+
+logging:
+  level:
+    io.netty: debug
