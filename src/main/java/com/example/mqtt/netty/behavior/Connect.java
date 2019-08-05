@@ -33,6 +33,10 @@ public class Connect {
         LOGGER.info("Connected.");
     }
 
+    public void disConnect(Channel channel, MqttConnectMessage connectMessage){
+        // 连接断开
+    }
+
     private void write(Channel channel, MqttConnectReturnCode connectReturnCode) {
         write(channel, connectReturnCode, false);
     }
