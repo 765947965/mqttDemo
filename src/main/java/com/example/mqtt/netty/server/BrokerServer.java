@@ -3,7 +3,6 @@ package com.example.mqtt.netty.server;
 
 import com.example.mqtt.netty.config.BrokerConfig;
 import com.example.mqtt.netty.handler.BrokerHandler;
-import com.example.mqtt.netty.behavior.Processor;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -28,7 +27,7 @@ public class BrokerServer {
 
     private BrokerConfig brokerConfig;
 
-    private Processor processor;
+    private BrokerHandler brokerHandler;
 
     private EventLoopGroup bossGroup;
 
@@ -37,9 +36,9 @@ public class BrokerServer {
     private Channel channel;
 
     @Autowired
-    public BrokerServer(BrokerConfig brokerConfig, Processor processor){
+    public BrokerServer(BrokerConfig brokerConfig, BrokerHandler brokerHandler){
         this.brokerConfig = brokerConfig;
-        this.processor = processor;
+        this.brokerHandler = brokerHandler;
     }
 
     @PostConstruct
@@ -59,7 +58,7 @@ public class BrokerServer {
                                 new IdleStateHandler(0, 0, 60));
                         channelPipeline.addLast("decoder", new MqttDecoder());
                         channelPipeline.addLast("encoder", MqttEncoder.INSTANCE);
-                        channelPipeline.addLast("broker", new BrokerHandler(processor));
+                        channelPipeline.addLast("broker", brokerHandler);
                     }
                 }).option(ChannelOption.SO_BACKLOG, 1024);
         channel = sb.bind(brokerConfig.getPort()).sync().channel();
