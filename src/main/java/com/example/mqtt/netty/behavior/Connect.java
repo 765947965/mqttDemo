@@ -33,8 +33,16 @@ public class Connect {
         LOGGER.info("Connected.");
     }
 
-    public void disConnect(Channel channel, MqttConnectMessage connectMessage){
+    public void disConnect(Channel channel, MqttConnectMessage connectMessage) {
         // 连接断开
+    }
+
+    public void processPingReq(Channel channel, MqttMessage connectMessage) {
+        // 响应心跳
+        MqttMessage pingRespMessage = MqttMessageFactory.newMessage(new MqttFixedHeader(MqttMessageType.PINGRESP,
+                        false, MqttQoS.AT_MOST_ONCE, false, 0),
+                null, null);
+        channel.writeAndFlush(pingRespMessage);
     }
 
     private void write(Channel channel, MqttConnectReturnCode connectReturnCode) {

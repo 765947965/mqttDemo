@@ -14,27 +14,28 @@ public class Publish {
     private static final Logger LOGGER = LoggerFactory.getLogger(Publish.class);
 
     public void processPublish(Channel channel, MqttPublishMessage publishMessage) {
-        // TODO: handle pub to a unconnected broker. After finishing session part
+        // 消息质量处理(回应)
+        int messageId = publishMessage.variableHeader().messageId();
+        switch (publishMessage.fixedHeader().qosLevel()) {
+            case AT_MOST_ONCE:
+                break;
+            case AT_LEAST_ONCE:
+                sendPubAckMsg(channel, messageId);
+                break;
+            case EXACTLY_ONCE:
+                sendPubRecMsg(channel, messageId);//TODO 未完善
+                break;
+            default:
+                break;
+        }
+
         String topic = publishMessage.variableHeader().topicName();
         ByteBuf buf = publishMessage.content().duplicate();
         byte[] tmp = new byte[buf.readableBytes()];
         buf.readBytes(tmp);
         String content = new String(tmp);
         LOGGER.info(content);
-        switch (publishMessage.fixedHeader().qosLevel()) {
-            case AT_MOST_ONCE:
-                break;
-            case AT_LEAST_ONCE:
-                sendPublishMsg(channel, topic, "收到");
-                break;
-            case EXACTLY_ONCE:
-                break;
-            case FAILURE:
-                break;
-            default:
-                break;
-        }
-
+        sendPublishMsg(channel, topic, "收到");
     }
 
     private void sendPublishMsg(Channel channel, String topic, String message) {
@@ -45,17 +46,24 @@ public class Publish {
         channel.writeAndFlush(sendMessage);
     }
 
+    /**
+     * 发送qos1 publish  确认消息
+     */
     private void sendPubAckMsg(Channel channel, int msgId) {
         MqttPubAckMessage pubAckMessage = (MqttPubAckMessage)
                 MqttMessageFactory.newMessage(new MqttFixedHeader(MqttMessageType.PUBACK,
                                 false, MqttQoS.AT_LEAST_ONCE, false, 2),
-                       MqttMessageIdVariableHeader.from(msgId), null);
+                        MqttMessageIdVariableHeader.from(msgId), null);
         channel.writeAndFlush(pubAckMessage);
     }
 
-    private void snedPubRecMsg(Channel channel, int msgId) {
+
+    /**
+     * 发送qos2 publish  确认消息 第一步
+     */
+    private void sendPubRecMsg(Channel channel, int msgId) {
         MqttMessage pubRecMessage = MqttMessageFactory.newMessage(new MqttFixedHeader(MqttMessageType.PUBREC,
-                false, MqttQoS.AT_LEAST_ONCE, false, 2),
+                        false, MqttQoS.AT_LEAST_ONCE, false, 2),
                 MqttMessageIdVariableHeader.from(msgId), null);
         channel.writeAndFlush(pubRecMessage);
     }
