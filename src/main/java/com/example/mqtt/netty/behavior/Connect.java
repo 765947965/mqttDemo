@@ -32,6 +32,9 @@ public class Connect {
     }
 
     public void disConnect(Channel channel) {
+        if (channel.isActive()) {
+            channel.close();
+        }
         // 连接断开
         LOGGER.info("disConnect : " + channel.hashCode());
     }
