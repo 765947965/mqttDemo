@@ -5,9 +5,7 @@ import io.netty.channel.Channel;
 import io.netty.handler.codec.mqtt.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
-@Component
 public class Connect {
     private static final Logger LOGGER = LoggerFactory.getLogger(Connect.class);
 
@@ -30,11 +28,12 @@ public class Connect {
 //        }
         // return connAck msg
         write(channel, MqttConnectReturnCode.CONNECTION_ACCEPTED, true);
-        LOGGER.info("Connected.");
+        LOGGER.info("Connected : " + channel.hashCode());
     }
 
-    public void disConnect(Channel channel, MqttConnectMessage connectMessage) {
+    public void disConnect(Channel channel) {
         // 连接断开
+        LOGGER.info("disConnect : " + channel.hashCode());
     }
 
     public void processPingReq(Channel channel, MqttMessage connectMessage) {

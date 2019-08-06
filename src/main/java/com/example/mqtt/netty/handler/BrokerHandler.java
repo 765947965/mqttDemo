@@ -7,20 +7,16 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.mqtt.MqttConnectMessage;
 import io.netty.handler.codec.mqtt.MqttMessage;
 import io.netty.handler.codec.mqtt.MqttPublishMessage;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-@Component
 public class BrokerHandler extends SimpleChannelInboundHandler<MqttMessage> {
 
     private Connect connect;
 
     private Publish publish;
 
-    @Autowired
-    public BrokerHandler(Connect connect, Publish publish) {
-        this.connect = connect;
-        this.publish = publish;
+    public BrokerHandler() {
+        this.connect = new Connect();
+        this.publish = new Publish();
     }
 
     protected void channelRead0(ChannelHandlerContext ctx, MqttMessage msg) {
@@ -55,12 +51,16 @@ public class BrokerHandler extends SimpleChannelInboundHandler<MqttMessage> {
              case PINGRESP:
                  break;
              case DISCONNECT:
-                 connect.disConnect(ctx.channel(), (MqttConnectMessage) msg);
+                 connect.disConnect(ctx.channel());
                  break;
              default:
                  break;
          }
     }
 
-
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        super.channelInactive(ctx);
+        connect.disConnect(ctx.channel());
+    }
 }

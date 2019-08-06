@@ -6,9 +6,7 @@ import io.netty.channel.Channel;
 import io.netty.handler.codec.mqtt.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
-@Component
 public class Publish {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Publish.class);

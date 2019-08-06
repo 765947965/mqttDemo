@@ -27,8 +27,6 @@ public class BrokerServer {
 
     private BrokerConfig brokerConfig;
 
-    private BrokerHandler brokerHandler;
-
     private EventLoopGroup bossGroup;
 
     private EventLoopGroup workerGroup;
@@ -36,9 +34,8 @@ public class BrokerServer {
     private Channel channel;
 
     @Autowired
-    public BrokerServer(BrokerConfig brokerConfig, BrokerHandler brokerHandler){
+    public BrokerServer(BrokerConfig brokerConfig){
         this.brokerConfig = brokerConfig;
-        this.brokerHandler = brokerHandler;
     }
 
     @PostConstruct
@@ -58,7 +55,7 @@ public class BrokerServer {
                                 new IdleStateHandler(0, 0, 60));
                         channelPipeline.addLast("decoder", new MqttDecoder());
                         channelPipeline.addLast("encoder", MqttEncoder.INSTANCE);
-                        channelPipeline.addLast("broker", brokerHandler);
+                        channelPipeline.addLast("broker", new BrokerHandler());
                     }
                 }).option(ChannelOption.SO_BACKLOG, 1024);
         channel = sb.bind(brokerConfig.getPort()).sync().channel();
